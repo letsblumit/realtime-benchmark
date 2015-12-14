@@ -1,0 +1,21 @@
+{
+  "indent": 2,
+  "predef": ["JSON"],
+  "quotmark": "single",
+  "plusplus": false,
+  "trailing": true,
+  "laxcomma": true,
+  "noempty": true,
+  "eqeqeq": true,
+  "newcap": true,
+  "strict": true,
+  "unused": true,
+  "nonew": true,
+  "noarg": true,
+  "undef": true,
+  "curly": true,
+  "forin": true,
+  "immed": true,
+  "mocha": true,
+  "node": true
+}

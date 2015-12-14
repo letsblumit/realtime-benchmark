@@ -1,0 +1,514 @@
+<!doctype html>
+<html>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Realtime Benchmark</title>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <style>
+    body {
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+
+    .header,
+    .footer {
+      padding-right: 15px;
+      padding-left: 15px;
+    }
+
+    .header {
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .header h3 {
+      margin-top: 0;
+      margin-bottom: 0;
+      line-height: 40px;
+    }
+
+    .footer {
+      padding-top: 19px;
+      color: #777777;
+      border-top: 1px solid #e5e5e5;
+    }
+
+    .container {
+      max-width: 970px;
+    }
+
+    .chartz {
+      width: 100%;
+      height: 500px;
+    }
+  </style>
+
+  <div id="top" class="container">
+    <div class="header">
+      <form class="form-inline">
+        Region:
+        <select id="regionSelect" class="form-control">
+          <option value="SOCKJS URL HERE">Virginia</option>
+          <option value="SOCKJS URL HERE">Oregon</option>
+          <option value="SOCKJS URL HERE">California</option>
+          <option value="SOCKJS URL HERE">Ireland</option>
+          <option value="SOCKJS URL HERE">Frankfurt</option>
+          <option value="SOCKJS URL HERE" selected>Singapore</option>
+          <option value="SOCKJS URL HERE">Tokyo</option>
+          <option value="SOCKJS URL HERE">Sydney</option>
+          <option value="SOCKJS URL HERE">Sao Paulo</option>
+        </select>
+
+        <div class="input-group">
+          <div class="input-group-addon">Size</div>
+          <input type="number" class="form-control" id="byteSize" value="1000">
+          <div class="input-group-addon">byte</div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-group-addon">Interval</div>
+          <input type="number" class="form-control" id="requestInterval" value="3">
+          <div class="input-group-addon">sec</div>
+        </div>
+
+        <button id="controls" type="button" class="btn btn-default">Pause</button>
+      </form>
+    </div>
+
+    <div id="toVirginia" class="well chartz"></div>
+    <div id="toOregon" class="well chartz"></div>
+    <div id="toCalifornia" class="well chartz"></div>
+    <div id="toIreland" class="well chartz"></div>
+    <div id="toFrankfurt" class="well chartz"></div>
+    <div id="toSingapore" class="well chartz"></div>
+    <div id="toTokyo" class="well chartz"></div>
+    <div id="toSydney" class="well chartz"></div>
+    <div id="toSaoPaulo" class="well chartz"></div>
+
+    <footer class="footer">
+      <a href="#top">Go Top</a>
+    </footer>
+  </div>
+
+  <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script src="//code.highcharts.com/highcharts.js"></script>
+  <script src="//code.highcharts.com/modules/boost.js"></script>
+  <script src="//code.highcharts.com/modules/exporting.js"></script>
+  <script src="//cdn.jsdelivr.net/sockjs/1.0.3/sockjs.min.js"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script>
+    $(function () {
+      var selectedRegion
+        , requestInterval
+        , $requestInterval = $('#requestInterval')
+        , $regionSelect = $('#regionSelect')
+        , $byteSize = $('#byteSize')
+        , $controls = $('#controls')
+        , connected = false
+        , socket = new SockJS($regionSelect.val())
+        , toVirginia
+        , toOregon
+        , toCalifornia
+        , toIreland
+        , toFrankfurt
+        , toSingapore
+        , toTokyo
+        , toSydney
+        , toSaoPaulo;
+
+      init();
+
+      $controls.on('click', function () {
+        if ($controls.text() === 'Pause') {
+          $controls.text('Resume');
+          clearInterval(requestInterval);
+        } else {
+          $controls.text('Pause');
+          requestInterval = setInterval(send, $requestInterval.val() * 1000);
+        }
+      });
+
+      $requestInterval.on('change', function () {
+        clearInterval(requestInterval);
+        requestInterval = setInterval(send, $requestInterval.val() * 1000);
+      });
+
+      $regionSelect.on('change', function () {
+        console.log('change', $regionSelect.val());
+        clearInterval(requestInterval);
+        socket = new SockJS($regionSelect.val());
+        init();
+      });
+
+      function onOpen() {
+        console.log('open', selectedRegion);
+        connected = true;
+        requestInterval = setInterval(send, $requestInterval.val() * 1000);
+      }
+
+      function onClose() {
+        console.log('closed', selectedRegion);
+        connected = false;
+      }
+
+      function onMessage(e) {
+        data = JSON.parse(e.data);
+
+        if (data.to === 'virginia') {
+          if (data.service === 'PubNub') {
+            toVirginia.series[0].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Pusher') {
+            toVirginia.series[1].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Firebase') {
+            toVirginia.series[2].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Fanout') {
+            toVirginia.series[3].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Hydna') {
+            toVirginia.series[4].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Realtime') {
+            toVirginia.series[5].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Envoy') {
+            toVirginia.series[6].addPoint(data.time, true, false);
+          }
+        }
+        if (data.to === 'oregon') {
+          if (data.service === 'PubNub') {
+            toOregon.series[0].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Pusher') {
+            toOregon.series[1].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Firebase') {
+            toOregon.series[2].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Fanout') {
+            toOregon.series[3].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Hydna') {
+            toOregon.series[4].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Realtime') {
+            toOregon.series[5].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Envoy') {
+            toOregon.series[6].addPoint(data.time, true, false);
+          }
+        }
+        if (data.to === 'california') {
+          if (data.service === 'PubNub') {
+            toCalifornia.series[0].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Pusher') {
+            toCalifornia.series[1].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Firebase') {
+            toCalifornia.series[2].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Fanout') {
+            toCalifornia.series[3].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Hydna') {
+            toCalifornia.series[4].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Realtime') {
+            toCalifornia.series[5].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Envoy') {
+            toCalifornia.series[6].addPoint(data.time, true, false);
+          }
+        }
+        if (data.to === 'ireland') {
+          if (data.service === 'PubNub') {
+            toIreland.series[0].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Pusher') {
+            toIreland.series[1].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Firebase') {
+            toIreland.series[2].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Fanout') {
+            toIreland.series[3].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Hydna') {
+            toIreland.series[4].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Realtime') {
+            toIreland.series[5].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Envoy') {
+            toIreland.series[6].addPoint(data.time, true, false);
+          }
+        }
+        if (data.to === 'frankfurt') {
+          if (data.service === 'PubNub') {
+            toFrankfurt.series[0].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Pusher') {
+            toFrankfurt.series[1].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Firebase') {
+            toFrankfurt.series[2].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Fanout') {
+            toFrankfurt.series[3].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Hydna') {
+            toFrankfurt.series[4].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Realtime') {
+            toFrankfurt.series[5].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Envoy') {
+            toFrankfurt.series[6].addPoint(data.time, true, false);
+          }
+        }
+        if (data.to === 'singapore') {
+          if (data.service === 'PubNub') {
+            toSingapore.series[0].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Pusher') {
+            toSingapore.series[1].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Firebase') {
+            toSingapore.series[2].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Fanout') {
+            toSingapore.series[3].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Hydna') {
+            toSingapore.series[4].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Realtime') {
+            toSingapore.series[5].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Envoy') {
+            toSingapore.series[6].addPoint(data.time, true, false);
+          }
+        }
+        if (data.to === 'tokyo') {
+          if (data.service === 'PubNub') {
+            toTokyo.series[0].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Pusher') {
+            toTokyo.series[1].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Firebase') {
+            toTokyo.series[2].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Fanout') {
+            toTokyo.series[3].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Hydna') {
+            toTokyo.series[4].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Realtime') {
+            toTokyo.series[5].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Envoy') {
+            toTokyo.series[6].addPoint(data.time, true, false);
+          }
+        }
+        if (data.to === 'sydney') {
+          if (data.service === 'PubNub') {
+            toSydney.series[0].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Pusher') {
+            toSydney.series[1].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Firebase') {
+            toSydney.series[2].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Fanout') {
+            toSydney.series[3].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Hydna') {
+            toSydney.series[4].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Realtime') {
+            toSydney.series[5].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Envoy') {
+            toSydney.series[6].addPoint(data.time, true, false);
+          }
+        }
+        if (data.to === 'saopaulo') {
+          if (data.service === 'PubNub') {
+            toSaoPaulo.series[0].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Pusher') {
+            toSaoPaulo.series[1].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Firebase') {
+            toSaoPaulo.series[2].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Fanout') {
+            toSaoPaulo.series[3].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Hydna') {
+            toSaoPaulo.series[4].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Realtime') {
+            toSaoPaulo.series[5].addPoint(data.time, true, false);
+          }
+          if (data.service === 'Envoy') {
+            toSaoPaulo.series[6].addPoint(data.time, true, false);
+          }
+        }
+      }
+
+      function send() {
+        socket.send(Math.random().toString(36).substr(2, $byteSize.val()));
+      }
+
+      function init() {
+        socket.onopen = onOpen;
+        socket.onclose = onClose;
+        socket.onmessage = onMessage;
+        selectedRegion = $('#regionSelect option:selected').text();
+
+        toVirginia = new Highcharts.Chart({
+          title: {text: selectedRegion + ' to Virginia'},
+          chart: {type: 'spline', renderTo: 'toVirginia', zoomType: 'x'},
+          yAxis: {title: {text: 'Latency (sec)'}},
+          series: [
+            {name: 'PubNub', data: []},
+            {name: 'Pusher', data: []},
+            {name: 'Firebase', data: []},
+            {name: 'Fanout', data: []},
+            {name: 'Hydna', data: []},
+            {name: 'Realtime.co', data: []},
+            {name: 'Blumr', data: []},
+          ]
+        });
+
+        toOregon = new Highcharts.Chart({
+          title: {text: selectedRegion + ' to Oregon'},
+          chart: {type: 'spline', renderTo: 'toOregon', zoomType: 'x'},
+          yAxis: {title: {text: 'Latency (sec)'}},
+          series: [
+            {name: 'PubNub', data: []},
+            {name: 'Pusher', data: []},
+            {name: 'Firebase', data: []},
+            {name: 'Fanout', data: []},
+            {name: 'Hydna', data: []},
+            {name: 'Realtime.co', data: []},
+            {name: 'Blumr', data: []},
+          ]
+        });
+
+        toCalifornia = new Highcharts.Chart({
+          title: {text: selectedRegion + ' to California'},
+          chart: {type: 'spline', renderTo: 'toCalifornia', zoomType: 'x'},
+          yAxis: {title: {text: 'Latency (sec)'}},
+          series: [
+            {name: 'PubNub', data: []},
+            {name: 'Pusher', data: []},
+            {name: 'Firebase', data: []},
+            {name: 'Fanout', data: []},
+            {name: 'Hydna', data: []},
+            {name: 'Realtime.co', data: []},
+            {name: 'Blumr', data: []},
+          ]
+        });
+
+        toIreland = new Highcharts.Chart({
+          title: {text: selectedRegion + ' to Ireland'},
+          chart: {type: 'spline', renderTo: 'toIreland', zoomType: 'x'},
+          yAxis: {title: {text: 'Latency (sec)'}},
+          series: [
+            {name: 'PubNub', data: []},
+            {name: 'Pusher', data: []},
+            {name: 'Firebase', data: []},
+            {name: 'Fanout', data: []},
+            {name: 'Hydna', data: []},
+            {name: 'Realtime.co', data: []},
+            {name: 'Blumr', data: []},
+          ]
+        });
+
+        toFrankfurt = new Highcharts.Chart({
+          title: {text: selectedRegion + ' to Frankfurt'},
+          chart: {type: 'spline', renderTo: 'toFrankfurt', zoomType: 'x'},
+          yAxis: {title: {text: 'Latency (sec)'}},
+          series: [
+            {name: 'PubNub', data: []},
+            {name: 'Pusher', data: []},
+            {name: 'Firebase', data: []},
+            {name: 'Fanout', data: []},
+            {name: 'Hydna', data: []},
+            {name: 'Realtime.co', data: []},
+            {name: 'Blumr', data: []},
+          ]
+        });
+
+        toSingapore = new Highcharts.Chart({
+          title: {text: selectedRegion + ' to Singapore'},
+          chart: {type: 'spline', renderTo: 'toSingapore', zoomType: 'x'},
+          yAxis: {title: {text: 'Latency (sec)'}},
+          series: [
+            {name: 'PubNub', data: []},
+            {name: 'Pusher', data: []},
+            {name: 'Firebase', data: []},
+            {name: 'Fanout', data: []},
+            {name: 'Hydna', data: []},
+            {name: 'Realtime.co', data: []},
+            {name: 'Blumr', data: []},
+          ]
+        });
+
+        toTokyo = new Highcharts.Chart({
+          title: {text: selectedRegion + ' to Tokyo'},
+          chart: {type: 'spline', renderTo: 'toTokyo', zoomType: 'x'},
+          yAxis: {title: {text: 'Latency (sec)'}},
+          series: [
+            {name: 'PubNub', data: []},
+            {name: 'Pusher', data: []},
+            {name: 'Firebase', data: []},
+            {name: 'Fanout', data: []},
+            {name: 'Hydna', data: []},
+            {name: 'Realtime.co', data: []},
+            {name: 'Blumr', data: []},
+          ]
+        });
+
+        toSydney = new Highcharts.Chart({
+          title: {text: selectedRegion + ' to Sydney'},
+          chart: {type: 'spline', renderTo: 'toSydney', zoomType: 'x'},
+          yAxis: {title: {text: 'Latency (sec)'}},
+          series: [
+            {name: 'PubNub', data: []},
+            {name: 'Pusher', data: []},
+            {name: 'Firebase', data: []},
+            {name: 'Fanout', data: []},
+            {name: 'Hydna', data: []},
+            {name: 'Realtime.co', data: []},
+            {name: 'Blumr', data: []},
+          ]
+        });
+
+        toSaoPaulo = new Highcharts.Chart({
+          title: {text: selectedRegion + ' to Sao Paulo'},
+          chart: {type: 'spline', renderTo: 'toSaoPaulo', zoomType: 'x'},
+          yAxis: {title: {text: 'Latency (sec)'}},
+          series: [
+            {name: 'PubNub', data: []},
+            {name: 'Pusher', data: []},
+            {name: 'Firebase', data: []},
+            {name: 'Fanout', data: []},
+            {name: 'Hydna', data: []},
+            {name: 'Realtime.co', data: []},
+            {name: 'Blumr', data: []},
+          ]
+        });
+      }
+    });
+  </script>
+

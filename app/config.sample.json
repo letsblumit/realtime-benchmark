@@ -1,0 +1,50 @@
+{
+  "id": "local",
+  "port": 8080,
+  "channel": "benchmark",
+  "sockjs": {
+    "prefix": "/benchmark",
+    "sockjs_url": "http://cdn.jsdelivr.net/sockjs/1.0.3/sockjs.min.js"
+  },
+  "endpoints": [],
+  "accounts": {
+    "pubnub": {
+      "ssl": false,
+      "publish_key": "",
+      "subscribe_key": ""
+    },
+    "pusher": {
+      "appId": "",
+      "key": "",
+      "secret": ""
+    },
+    "firebase": {
+      "domain": ""
+    },
+    "fanout": {
+      "realmId": "",
+      "realmKey": "",
+      "domain": ""
+    },
+    "hydna": {
+      "domain": ""
+    },
+    "realtime": {
+      "appKey": "",
+      "privateKey": "",
+      "clusterUrl": ""
+    },
+    "syncano": {
+      "apiKey": "",
+      "userKey": "",
+      "accountKey": "",
+      "instanceName": ""
+    },
+    "ably": {
+      "apiKey": ""
+    },
+    "envoy": {
+      "url": ""
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "realtime-benchmark",
+  "main": "./app/server",
+  "author": "LetsBlumIt Corp.",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=0.12.x"
+  },
+  "scripts": {
+    "test": "mocha test",
+    "lint": "jshint app",
+    "check": "jscs app"
+  },
+  "dependencies": {
+    "async": "1.2.x",
+    "lazy.js": "0.4.x",
+    "forever": "0.15.x",
+    "express": "4.13.x",
+    "ws": "0.8.x",
+    "sockjs": "0.3.x",
+    "pubnub": "3.7.x",
+    "pusher": "1.0.x",
+    "pusher-client": "0.2.x",
+    "firebase": "2.3.x",
+    "fanoutpub": "1.0.x",
+    "faye": "1.1.x",
+    "hydna": "2.0.x",
+    "ibtrealtimesjnode": "2.1.x",
+    "syncano": "0.3.x"
+  },
+  "devDependencies": {
+    "jscs": "2.6.x",
+    "jshint": "2.8.x",
+    "mocha": "2.3.x",
+    "chai": "3.4.x",
+    "coveralls": "2.11.x",
+    "istanbul": "0.4.x",
+    "chalk": "1.0.x",
+    "json-stringify-safe": "5.0.x"
+  }
+}
