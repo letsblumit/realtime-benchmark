@@ -1,9 +1,9 @@
 Benchmark of Real-Time Services
 ==========
 
-[![Build Status](https://travis-ci.org/genediazjr/realtime-benchmark.svg)](https://travis-ci.org/genediazjr/realtime-benchmark)
-[![Coverage Status](https://img.shields.io/coveralls/genediazjr/realtime-benchmark.svg)](https://coveralls.io/r/genediazjr/realtime-benchmark)
-[![Code Climate](https://codeclimate.com/github/genediazjr/realtime-benchmark/badges/gpa.svg)](https://codeclimate.com/github/genediazjr/realtime-benchmark)
+[![Build Status](https://travis-ci.org/letsblumit/realtime-benchmark.svg)](https://travis-ci.org/letsblumit/realtime-benchmark)
+[![Coverage Status](https://img.shields.io/coveralls/letsblumit/realtime-benchmark.svg)](https://coveralls.io/r/letsblumit/realtime-benchmark)
+[![Code Climate](https://codeclimate.com/github/letsblumit/realtime-benchmark/badges/gpa.svg)](https://codeclimate.com/github/letsblumit/realtime-benchmark)
 
 Test Subjects:
 
